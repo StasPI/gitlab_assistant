@@ -22,10 +22,10 @@ class GitlabMembers():
     def group_mebmers_db(self):
         # получение списка юзеров группы из базы данных
         members_db = []
-        sqlstr = 'select * from members where id <> 31'
+        sqlstr = 'select ID from members where ID <> 31'
         self.cursor.execute(sqlstr)
         for member in self.cursor:
-            members_db.append(member)
+            members_db.append(member[0])
         return members_db
 
     def members_run(self):

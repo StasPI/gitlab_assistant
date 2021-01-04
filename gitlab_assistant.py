@@ -39,24 +39,29 @@ def search_for_merge_requests(group):
         if str(mr.merged_at) == "None":
             if str(mr.assignee) == "None":
                 empty_merge_requests_iid[mr.iid] = mr.target_branch
-                pass
             else:
                 not_empty_merge_requests[mr.iid] = mr.assignee['id']
     return empty_merge_requests_iid, not_empty_merge_requests
 
 
-def brain_reviewer(empty_merge_requests_iid, members_db, gl):
+def brain_reviewer(group, members_db, gl):
+    empty_merge_requests_iid, not_empty_merge_requests = search_for_merge_requests(
+        group)
     for mr_iid, target_branch in empty_merge_requests_iid.items():
         tb = target_branch.lower()[0]
         if tb == version_branch:
             # если вверсию то только Серега
-            appoint.appoint_reviewer(gl, mr_iid, 31)
+            not_empty_merge_requests = appoint.appoint_reviewer(
+                not_empty_merge_requests, gl, mr_iid, 31)
         elif tb == user_story_branch:
-            appoint.appoint_reviewer_random(members_db, gl, mr_iid)
+            not_empty_merge_requests = appoint.appoint_reviewer_random(
+                members_db, not_empty_merge_requests, gl, mr_iid)
         elif tb == bug_branch:
-            appoint.appoint_reviewer_random(members_db, gl, mr_iid)
+            not_empty_merge_requests = appoint.appoint_reviewer_random(
+                members_db, not_empty_merge_requests, gl, mr_iid)
         else:
-            appoint.appoint_reviewer_random(members_db, gl, mr_iid)
+            not_empty_merge_requests = appoint.appoint_reviewer_random(
+                members_db, not_empty_merge_requests, gl, mr_iid)
 
 
 if __name__ == '__main__':
@@ -69,6 +74,4 @@ if __name__ == '__main__':
         members_db = gm.members_run()
         # инициализация класса назначения ревьюира
         appoint = Appoint(project_id)
-        empty_merge_requests_iid, not_empty_merge_requests = search_for_merge_requests(
-            group)
-        brain_reviewer(empty_merge_requests_iid, members_db, gl)
+        brain_reviewer(group, members_db, gl)
