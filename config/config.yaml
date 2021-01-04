@@ -1,0 +1,12 @@
+db:
+    db_driver : ODBC Driver 17 for SQL Server
+    server : 
+    database : 
+gitlab:
+    url : 
+    token : 
+    project : [, ]
+branch:
+    version : 
+    user_story : 
+    bug : 
