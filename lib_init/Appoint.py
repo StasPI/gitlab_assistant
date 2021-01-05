@@ -17,13 +17,15 @@ class Appoint():
         not_empty_merge_requests[mr_iid] = reviewer_id
         return not_empty_merge_requests
 
-    def appoint_reviewer_random(self, members_db, not_empty_merge_requests, gl,
-                                mr_iid):
+    def appoint_reviewer_random(self, members_db, not_empty_merge_requests,
+                                empty_merge_requests_author_id, gl, mr_iid):
         # назначает рандомного ревьюера на мерж реквест
+        author_id = empty_merge_requests_author_id[mr_iid]
         count_requests_user = Counter(not_empty_merge_requests.values())
         busy_men = list(
             filter(lambda id_user: count_requests_user[id_user] >= 2,
                    count_requests_user.keys()))
+        busy_men = list(set(busy_men + author_id))
         free_men = list(set(members_db) ^ set(busy_men))
         if not free_men:
             sys.exit()

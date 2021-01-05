@@ -33,19 +33,21 @@ gl.auth()
 def search_for_merge_requests(group):
     # сбор мерж реквестов пустых и назначенных
     empty_merge_requests_iid = dict()
+    empty_merge_requests_author_id = dict()
     not_empty_merge_requests = dict()
     mr_all = group.mergerequests.list()
     for mr in mr_all:
         if str(mr.merged_at) == "None":
             if str(mr.assignee) == "None":
                 empty_merge_requests_iid[mr.iid] = mr.target_branch
+                empty_merge_requests_author_id[mr.iid] = [mr.author['id']]
             else:
                 not_empty_merge_requests[mr.iid] = mr.assignee['id']
-    return empty_merge_requests_iid, not_empty_merge_requests
+    return empty_merge_requests_iid, empty_merge_requests_author_id, not_empty_merge_requests
 
 
 def brain_reviewer(group, members_db, gl):
-    empty_merge_requests_iid, not_empty_merge_requests = search_for_merge_requests(
+    empty_merge_requests_iid, empty_merge_requests_author_id, not_empty_merge_requests = search_for_merge_requests(
         group)
     for mr_iid, target_branch in empty_merge_requests_iid.items():
         tb = target_branch.lower()[0]
@@ -55,13 +57,16 @@ def brain_reviewer(group, members_db, gl):
                 not_empty_merge_requests, gl, mr_iid, 31)
         elif tb == user_story_branch:
             not_empty_merge_requests = appoint.appoint_reviewer_random(
-                members_db, not_empty_merge_requests, gl, mr_iid)
+                members_db, not_empty_merge_requests,
+                empty_merge_requests_author_id, gl, mr_iid)
         elif tb == bug_branch:
             not_empty_merge_requests = appoint.appoint_reviewer_random(
-                members_db, not_empty_merge_requests, gl, mr_iid)
+                members_db, not_empty_merge_requests,
+                empty_merge_requests_author_id, gl, mr_iid)
         else:
             not_empty_merge_requests = appoint.appoint_reviewer_random(
-                members_db, not_empty_merge_requests, gl, mr_iid)
+                members_db, not_empty_merge_requests,
+                empty_merge_requests_author_id, gl, mr_iid)
 
 
 if __name__ == '__main__':
